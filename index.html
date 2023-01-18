@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>addIP</title>
+
+    <!-- Config start -->
+    <script>
+        const url = "Google Apps Script URL";
+        const startMessage = "同意中.."
+        const errorMessage = "同意できませんでした"
+        const allowMessage = "同意が完了しました"
+        const allowedMessage = "既に同意してあります"
+    </script>
+    <!-- Config end -->
+
+
+    <style type="text/css">
+        body {
+            text-align: center;
+        }
+    </style>
+    <script>
+        async function start() {
+            let cache;// キャッシュ用
+            const button = document.getElementById('button');
+            button.innerText = startMessage;
+
+            cache = await get('https://ipinfo.io?callback');
+            if (isError(cache, button)) return;
+
+            cache = await get(`${url}?type=addAllow&ip=${cache.ip}`);
+            if (isError(cache, button)) return;
+
+            if (cache.type == "OK") {
+                button.innerText = allowMessage;
+            } else {
+                button.innerText = allowedMessage;
+            }
+        };
+        function isError(item, button) {// エラーかどうか判定
+            if (item == undefined) {
+                button.innerText = errorMessage;
+                return true;
+            }
+            return false;
+        }
+        function get(url) {// Get リクエスト
+            return new Promise((resolve) => {
+                fetch(url)
+                    .then(res => res.json())
+                    .then(json => resolve(json))
+                    .catch(error => resolve(undefined));
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <button type="button" id="button" onclick="start();">同意する</button>
+</body>
+
+</html>
